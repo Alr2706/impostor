@@ -5,30 +5,33 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Juego del Impostor</title>
 <style>
-    body { font-family: Arial, sans-serif; text-align: center; margin: 0; padding: 20px; background: #f0f0f0; }
-    .hidden { display: none; }
-    input, button { margin: 5px; padding: 10px; font-size: 16px; }
-    .player-name { font-size: 24px; font-weight: bold; margin: 20px 0; }
-    .role, .word { font-size: 28px; font-weight: bold; color: red; margin: 20px 0; }
+body { font-family: Arial, sans-serif; text-align: center; margin: 0; padding: 20px; background: #f0f0f0; }
+.hidden { display: none; }
+input, button { margin: 5px; padding: 10px; font-size: 16px; }
+.player-name { font-size: 24px; font-weight: bold; margin: 20px 0; }
+.role, .word { font-size: 28px; font-weight: bold; color: red; margin: 20px 0; }
 </style>
 </head>
 <body>
 
 <div id="setup">
-    <h2>Configura tu juego</h2>
-    <label>Número de jugadores:
-        <input type="number" id="numPlayers" min="2" max="20" value="4">
-    </label><br>
-    <button onclick="createPlayerInputs()">Siguiente</button>
-    <div id="namesInputs"></div>
+<h2>Configura tu juego</h2>
+<label>Número de jugadores:
+<input type="number" id="numPlayers" min="2" max="20" value="4">
+</label><br>
+<label>Número de impostores:
+<input type="number" id="numImpostors" min="1" value="1">
+</label><br>
+<button onclick="createPlayerInputs()">Siguiente</button>
+<div id="namesInputs"></div>
 </div>
 
 <div id="game" class="hidden">
-    <div class="player-name" id="currentPlayer"></div>
-    <div class="word hidden" id="currentWord"></div>
-    <div class="role hidden" id="currentRole"></div>
-    <button id="showRoleBtn" onclick="showRole()">Mostrar Rol y Palabra</button>
-    <button id="nextPlayerBtn" class="hidden" onclick="nextPlayer()">Siguiente Jugador</button>
+<div class="player-name" id="currentPlayer"></div>
+<div class="word hidden" id="currentWord"></div>
+<div class="role hidden" id="currentRole"></div>
+<button id="showRoleBtn" onclick="showRole()">Mostrar Rol y Palabra</button>
+<button id="nextPlayerBtn" class="hidden" onclick="nextPlayer()">Siguiente Jugador</button>
 </div>
 
 <script>
@@ -37,108 +40,91 @@ let roles = [];
 let word = '';
 let currentPlayerIndex = 0;
 
-// Lista de palabras
-const wordList = ["Tuberia",
-
-"Francisco Franco",
-"Celiaun",
-                  "illojuan","blue label",
-"Hitler",
-"Pedro Sanchez",
-"Tanga",
-"Puticlub",
-"Mariano",
-"Cocaina",
-"Limbo",
-"Copa E",
-"Micky Mouse",
-"Cristiano Ronaldo",
-"Pedofilia",
-"Morata",
-"Ordenador",
-"Instituto",
-"Racismo",
-"Machismo",
-"Marcos Olme",
-"Patin Electrico",
-"Donald Trump",
-"Venezuela",
-"Marihuana",
-"Sexo",
-"Paula Mira",
-"Casino",
-"Rickyedit"];
+const wordList = ["Tuberia","Francisco Franco","Celiaun","illojuan","blue label","Hitler","Pedro Sanchez","Tanga","Puticlub","Mariano","Cocaina","Limbo","Copa E","Micky Mouse","Cristiano Ronaldo","Pedofilia","Morata","Ordenador","Instituto","Racismo","Machismo","Marcos Olme","Patin Electrico","Donald Trump","Venezuela","Marihuana","Sexo","Paula Mira","Casino","Rickyedit"];
 
 function createPlayerInputs() {
-    const num = parseInt(document.getElementById('numPlayers').value);
-    const container = document.getElementById('namesInputs');
-    container.innerHTML = '';
-    for (let i = 0; i < num; i++) {
-        const input = document.createElement('input');
-        input.placeholder = `Nombre jugador ${i+1}`;
-        input.id = `player${i}`;
-        container.appendChild(input);
-        container.appendChild(document.createElement('br'));
-    }
-    const startBtn = document.createElement('button');
-    startBtn.textContent = 'Comenzar juego';
-    startBtn.onclick = startGame;
-    container.appendChild(startBtn);
+const num = parseInt(document.getElementById('numPlayers').value);
+const container = document.getElementById('namesInputs');
+container.innerHTML = '';
+for (let i = 0; i < num; i++) {
+const input = document.createElement('input');
+input.placeholder = `Nombre jugador ${i+1}`;
+input.id = `player${i}`;
+container.appendChild(input);
+container.appendChild(document.createElement('br'));
+}
+const startBtn = document.createElement('button');
+startBtn.textContent = 'Comenzar juego';
+startBtn.onclick = startGame;
+container.appendChild(startBtn);
 }
 
 function startGame() {
-    const num = parseInt(document.getElementById('numPlayers').value);
-    players = [];
-    for (let i = 0; i < num; i++) {
-        const name = document.getElementById(`player${i}`).value.trim();
-        if (!name) {
-            alert('Por favor, introduce todos los nombres');
-            return;
-        }
-        players.push(name);
-    }
+const numPlayers = parseInt(document.getElementById('numPlayers').value);
+const numImpostors = parseInt(document.getElementById('numImpostors').value);
 
-    // Elegir un impostor aleatorio
-    const impostorIndex = Math.floor(Math.random() * players.length);
-    roles = players.map((_, i) => i === impostorIndex ? 'IMPOSTOR' : 'TRIPULANTE');
+if (numImpostors >= numPlayers) {
+alert('El número de impostores debe ser menor que el de jugadores');
+return;
+}
 
-    // Elegir una palabra para todos los tripulantes
-    word = wordList[Math.floor(Math.random() * wordList.length)];
+players = [];
+for (let i = 0; i < numPlayers; i++) {
+const name = document.getElementById(`player${i}`).value.trim();
+if (!name) {
+alert('Por favor, introduce todos los nombres');
+return;
+}
+players.push(name);
+}
 
-    document.getElementById('setup').classList.add('hidden');
-    document.getElementById('game').classList.remove('hidden');
-    currentPlayerIndex = 0;
-    showNextPlayer();
+roles = Array(numPlayers).fill('TRIPULANTE');
+
+let impostorsChosen = 0;
+while (impostorsChosen < numImpostors) {
+const index = Math.floor(Math.random() * numPlayers);
+if (roles[index] !== 'IMPOSTOR') {
+roles[index] = 'IMPOSTOR';
+impostorsChosen++;
+}
+}
+
+word = wordList[Math.floor(Math.random() * wordList.length)];
+
+document.getElementById('setup').classList.add('hidden');
+document.getElementById('game').classList.remove('hidden');
+currentPlayerIndex = 0;
+showNextPlayer();
 }
 
 function showNextPlayer() {
-    document.getElementById('currentPlayer').textContent = players[currentPlayerIndex];
-    document.getElementById('currentWord').classList.add('hidden');
-    document.getElementById('currentRole').classList.add('hidden');
-    document.getElementById('showRoleBtn').classList.remove('hidden');
-    document.getElementById('nextPlayerBtn').classList.add('hidden');
+document.getElementById('currentPlayer').textContent = players[currentPlayerIndex];
+document.getElementById('currentWord').classList.add('hidden');
+document.getElementById('currentRole').classList.add('hidden');
+document.getElementById('showRoleBtn').classList.remove('hidden');
+document.getElementById('nextPlayerBtn').classList.add('hidden');
 }
 
 function showRole() {
-    const role = roles[currentPlayerIndex];
-    document.getElementById('currentRole').textContent = role;
-    if (role === 'TRIPULANTE') {
-        document.getElementById('currentWord').textContent = `Palabra: ${word}`;
-        document.getElementById('currentWord').classList.remove('hidden');
-    }
-    document.getElementById('currentRole').classList.remove('hidden');
-    document.getElementById('showRoleBtn').classList.add('hidden');
-    document.getElementById('nextPlayerBtn').classList.remove('hidden');
+const role = roles[currentPlayerIndex];
+document.getElementById('currentRole').textContent = role;
+if (role === 'TRIPULANTE') {
+document.getElementById('currentWord').textContent = `Palabra: ${word}`;
+document.getElementById('currentWord').classList.remove('hidden');
+}
+document.getElementById('currentRole').classList.remove('hidden');
+document.getElementById('showRoleBtn').classList.add('hidden');
+document.getElementById('nextPlayerBtn').classList.remove('hidden');
 }
 
 function nextPlayer() {
-    currentPlayerIndex++;
-    if (currentPlayerIndex >= players.length) {
-        alert('Todos los jugadores han visto su rol. ¡Que comience el juego!');
-        location.reload();
-    } else {
-        showNextPlayer();
-    }
+currentPlayerIndex++;
+if (currentPlayerIndex >= players.length) {
+alert('Todos los jugadores han visto su rol. ¡Que comience el juego!');
+location.reload();
+} else {
+showNextPlayer();
+}
 }
 </script>
 
